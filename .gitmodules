@@ -1,0 +1,9 @@
+[submodule "submodules/research-wmf-utils"]
+	path = submodules/research-wmf-utils
+	url = https://github.com/wikimedia/research-wmf-utils
+[submodule "submodules/word2vec"]
+	path = submodules/word2vec
+	url = https://github.com/tmikolov/word2vec
+[submodule "submodules/convertvec"]
+	path = submodules/convertvec
+	url = https://github.com/marekrei/convertvec

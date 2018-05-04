@@ -1,7 +1,8 @@
 import argparse
 import os
 
-UTILS_DIR = '/home/bmansurov/wmf/util/'
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+UTILS_DIR = os.path.join(SCRIPT_DIR, '../submodules/research-wmf-utils/util/')
 
 """
 python etl.py \

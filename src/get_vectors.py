@@ -4,8 +4,10 @@ import os
 
 # Prefixed with '/user/' in HDFS and '/home/' under local file system.
 OUTPUT_DIR = 'bmansurov/data/navigation_vectors'
-WORD2VEC_BIN = '/home/bmansurov/word2vec/word2vec'
-CONVERTVEC_BIN = '/home/bmansurov/convertvec/convertvec'
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+WORD2VEC_BIN = os.path.join(SCRIPT_DIR, '../submodules/word2vec/word2vec')
+CONVERTVEC_BIN = os.path.join(
+    SCRIPT_DIR, '../submodules/convertvec/convertvec')
 
 """
 Given a file of sessions, train a word2vec model where
