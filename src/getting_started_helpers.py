@@ -5,23 +5,22 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 
-def get_tsne(embedding, pca_dim = 20, n_items=10000):
+def get_tsne(embedding, pca_dim=20, n_items=10000):
     """
     TSNE dimensionality reduction.
-    
+
     The TSNE algorithm is quite slow, so we:
-    
+
     1. only use the first n_items from the embedding
     2. reduce embedding dimensionality via PCA
     3. run TSNE on reduced embedding matrix
-    
+
     """
     X = embedding.E[:n_items]
     pca = PCA(n_components=pca_dim)
     X = pca.fit_transform(X)
     tsne = TSNE(n_components=2, random_state=0)
     return tsne.fit_transform(X)
-
 
 
 def repel_labels(ax, x, y, labels, k=10):
@@ -46,11 +45,11 @@ def repel_labels(ax, x, y, labels, k=10):
     # undo spring_layout's rescaling
     pos_after = np.vstack([pos[d] for d in data_nodes])
     pos_before = np.vstack([init_pos[d] for d in data_nodes])
-    scale, shift_x = np.polyfit(pos_after[:,0], pos_before[:,0], 1)
-    scale, shift_y = np.polyfit(pos_after[:,1], pos_before[:,1], 1)
+    scale, shift_x = np.polyfit(pos_after[:, 0], pos_before[:, 0], 1)
+    scale, shift_y = np.polyfit(pos_after[:, 1], pos_before[:, 1], 1)
     shift = np.array([shift_x, shift_y])
     for key, val in pos.items():
-        pos[key] = (val*scale) + shift
+        pos[key] = (val * scale) + shift
 
     for label, data_str in G.edges():
         ax.annotate(label,
@@ -58,15 +57,16 @@ def repel_labels(ax, x, y, labels, k=10):
                     xytext=pos[label], textcoords='data',
                     arrowprops=dict(arrowstyle="->",
                                     shrinkA=0, shrinkB=0,
-                                    connectionstyle="arc3", 
+                                    connectionstyle="arc3",
                                     color='red'), )
     # expand limits
     all_pos = np.vstack(pos.values())
     x_span, y_span = np.ptp(all_pos, axis=0)
-    mins = np.min(all_pos-x_span*0.15, 0)
-    maxs = np.max(all_pos+y_span*0.15, 0)
+    mins = np.min(all_pos - x_span * 0.15, 0)
+    maxs = np.max(all_pos + y_span * 0.15, 0)
     ax.set_xlim([mins[0], maxs[0]])
     ax.set_ylim([mins[1], maxs[1]])
+
 
 def plot_tsne(embedding, tsne, n=20):
     """
@@ -83,7 +83,7 @@ def plot_tsne(embedding, tsne, n=20):
 def plot_tsne_simple(embedding, tsne):
     plt.figure(figsize=(8, 8))
     for i in range(20):
-        x, y = tsne_embedding[i,:]
+        x, y = embedding[i, :]
         plt.scatter(x, y)
         plt.annotate(embedding.idx2w[i],
                      xy=(x, y),
