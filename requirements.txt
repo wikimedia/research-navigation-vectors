@@ -1,0 +1,8 @@
+DBUtils==1.2
+numpy==1.14.2
+pandas==0.22.0
+py4j==0.10.6
+pyspark==2.3.0
+python-dateutil==2.7.2
+pytz==2018.4
+six==1.11.0
