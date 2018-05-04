@@ -1,11 +1,10 @@
-from pyspark import SparkConf, SparkContext
 import argparse
 import datetime
 import os
 
-# Prefixed with '/user/' in HDFS and '/home/' under local file system.
-OUTPUT_DIR = 'bmansurov/data/navigation_vectors'
+from pyspark import SparkConf, SparkContext
 
+from .config import get_config
 
 """
 Given a hive table of requests grouped by IP, UA, XFF and day:
@@ -105,7 +104,6 @@ def filter_blacklist(requests):
     drop the session. Currently, only the Main Page is
     in the black list
     """
-
     black_list = set(['Q5296', ])
     for r in requests:
         if r['id'] in black_list:
@@ -120,33 +118,40 @@ def scrub_dates(requests):
 
 
 if __name__ == '__main__':
+    config = get_config()
     parser = argparse.ArgumentParser()
-    parser.add_argument('--request_db', default='a2v', help='hive db')
+    parser.add_argument('--request_db',
+                        default=config['sessions']['hive_db'],
+                        help='hive db')
     parser.add_argument('--release', required=True, help='hive table')
-    parser.add_argument('--lang', required=True,
-                        default='wikidata', help='wikidata will use all langs')
+    parser.add_argument('--lang',
+                        required=True,
+                        default=config['sessions']['wikidata'],
+                        help='wikidata will use all langs')
     args = vars(parser.parse_args())
 
     args['table'] = args['release'].replace('-', '_') + '_requests'
-    args['output_dir'] = OUTPUT_DIR
+    args['base_hdfs_output_dir'] = config['common']['hdfs_output_dir']
+    args['base_local_output_dir'] = config['common']['local_output_dir']
 
     # create base dirs
-    base_dir = '/user/%(output_dir)/%(release)s' % args
-    print(os.system('hadoop fs -mkdir ' + base_dir))
-    local_base_dir = '/home/%(output_dir)/%(release)s' % args
-    print(os.system('mkdir ' + local_base_dir))
+    print('Creating output dirs.')
+    print(os.system(
+        'hadoop fs -mkdir %(base_hdfs_output_dir)s/%(release)s' % args))
+    print(os.system('mkdir %(base_local_output_dir)s/%(release)s' % args))
 
     # define io paths
     args['input_dir'] = '/user/hive/warehouse/'\
                         '%(request_db)s.db/%(table)s' % args
-    args['hdfs_output_dir'] = '/user/%(output_dir)/%(release)s/'\
+    args['hdfs_output_dir'] = '%(base_hdfs_output_dir)s/%(release)s/'\
                               '%(release)s_sessions_%(lang)s' % args
-    args['local_output_file'] = '/home/%(output_dir)/%(release)s/'\
+    args['local_output_file'] = '%(base_local_output_dir)s/%(release)s/'\
                                 '%(release)s_sessions_%(lang)s' % args
-    args['local_output_dir'] = '/home/%(output_dir)/%(release)s/'\
+    args['local_output_dir'] = '%(base_local_output_dir)s/%(release)s/'\
                                '%(release)s_sessions_%(lang)s_dir' % args
 
     # clean up old data
+    print('Cleaning up old data.')
     print(os.system('hadoop fs -rm -r %(hdfs_output_dir)s' % args))
     print(os.system('rm -rf %(local_output_file)s' % args))
     print(os.system('rm -rf %(local_output_dir)s' % args))
@@ -179,7 +184,7 @@ if __name__ == '__main__':
         .map(scrub_dates) \
         .map(to_str) \
         .saveAsTextFile(
-            args['output_dir'],
+            args['hdfs_output_dir'],
             compressionCodecClass="org.apache.hadoop.io.compress.GzipCodec")
 
     # transfer data to local

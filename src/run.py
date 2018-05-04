@@ -2,10 +2,7 @@ import argparse
 import os
 import sys
 
-# Prefixed with '/user/' in HDFS and '/home/' under local file system.
-OUTPUT_DIR = 'bmansurov/data/navigation_vectors'
-# Used to find other accompanying scripts
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+from .config import get_config
 
 
 """
@@ -39,6 +36,7 @@ python run.py \
 
 
 if __name__ == '__main__':
+    config = get_config()
     parser = argparse.ArgumentParser()
     parser.add_argument('--get_requests', default=False, action='store_true')
     parser.add_argument('--get_sessions', default=False, action='store_true')
@@ -49,13 +47,14 @@ if __name__ == '__main__':
     parser.add_argument('--langs', required=False)
     parser.add_argument('--dims', required=False)
     args = vars(parser.parse_args())
-    args['output_dir'] = OUTPUT_DIR
-    args['script_dir'] = SCRIPT_DIR
+    args['hdfs_output_dir'] = config['common']['hdfs_output_dir']
+    args['local_output_dir'] = config['common']['local_output_dir']
+    args['script_path'] = config['common']['script_path']
 
     if args['get_requests']:
         if 'start' in args and 'stop' in args:
             cmd = """
-                python %(script_dir)/get_requests.py \
+                python %(script_path)s/get_requests.py \
                 --start %(start)s \
                 --stop  %(stop)s \
                 --release %(release)s \
@@ -69,7 +68,7 @@ if __name__ == '__main__':
     if args['get_sessions']:
         if 'langs' in args:
             os.system(
-                "hadoop fs -mkdir /user/%(output_dir)/%(release)s" % args)
+                "hadoop fs -mkdir %(hdfs_output_dir)s/%(release)s" % args)
             cmd = """
                 spark-submit \
                     --driver-memory 5g \
@@ -79,7 +78,7 @@ if __name__ == '__main__':
                     --executor-memory 10g \
                     --executor-cores 4 \
                     --queue priority \
-                %(script_dir)/get_sessions.py \
+                %(script_path)s/get_sessions.py \
                     --release %(release)s \
                     --lang %(lang)s
             """
@@ -93,9 +92,9 @@ if __name__ == '__main__':
     if args['get_vectors']:
         cmds = []
         if 'langs' in args and 'dims' in args:
-            os.system("mkdir /home/%(output_dir)/%(release)s" % args)
+            os.system("mkdir %(local_output_dir)s/%(release)s" % args)
             cmd = """
-            python %(script_dir)/get_vectors.py \
+            python %(script_path)s/get_vectors.py \
                 --release %(release)s \
                 --lang %(lang)s \
                 --dims %(dim)s \

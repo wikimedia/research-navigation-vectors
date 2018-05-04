@@ -1,8 +1,8 @@
 import argparse
 import os
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-UTILS_DIR = os.path.join(SCRIPT_DIR, '../submodules/research-wmf-utils/util/')
+from .config import get_config
+
 
 """
 python etl.py \
@@ -11,41 +11,42 @@ python etl.py \
 """
 
 if __name__ == '__main__':
+    config = get_config()
     parser = argparse.ArgumentParser()
     parser.add_argument('--day', required=False)
     parser.add_argument('--langs', required=False,
                         help='comma seperated list of languages')
     args = vars(parser.parse_args())
-    args['utils_dir'] = UTILS_DIR
+    args['util_path'] = config['common']['util_path'],
     print(args)
     if args['day']:
         cmd = """
-        python %(utils_dir)/wikidata_utils.py \
+        python %(util_path)s/wikidata_utils.py \
             --day %(day)s \
             --download_dump
         """
         os.system(cmd % args)
         cmd = """
-        spark-submit \
-            --driver-memory 5g \
-            --master yarn \
-            --deploy-mode client \
-            --num-executors 8 \
-            --executor-memory 10g \
-            --executor-cores 4 \
-            --queue priority \
-        %(utils_dir)/wikidata_utils.py \
-            --day %(day)s \
-            --extract_wills \
-            --create_table \
-            --db prod
+            spark-submit \
+                --driver-memory 5g \
+                --master yarn \
+                --deploy-mode client \
+                --num-executors 8 \
+                --executor-memory 10g \
+                --executor-cores 4 \
+                --queue priority \
+            %(util_path)s/wikidata_utils.py \
+                --day %(day)s \
+                --extract_wills \
+                --create_table \
+                --db prod
         """
         os.system(cmd % args)
     if args['langs']:
         cmd = """
-        python %(utils_dir)/get_multilingual_prod_db.py \
-            --db prod \
-            --langs %(langs)s \
-            --tables page,redirect,page_props
+            python %(util_path)s/get_multilingual_prod_db.py \
+                --db prod \
+                --langs %(langs)s \
+                --tables page,redirect,page_props
         """
         os.system(cmd % args)

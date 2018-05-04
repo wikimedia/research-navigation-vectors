@@ -1,6 +1,9 @@
+import argparse
+
 from db_utils import exec_hive_stat2
 from db_utils import get_hive_timespan
-import argparse
+
+from .config import get_config
 
 
 """
@@ -15,9 +18,8 @@ python get_requests.py \
 """
 
 
-def get_requests(start, stop, table,  trace_db='a2v',
-                 prod_db='prod', priority=True, min_count=50):
-
+def get_requests(start, stop, table,  trace_db,
+                 prod_db, priority=True, min_count=50):
     query = """
         SET mapreduce.input.fileinputformat.split.maxsize=200000000;
         SET hive.mapred.mode=nonstrict;
@@ -215,10 +217,13 @@ def get_requests(start, stop, table,  trace_db='a2v',
 
 
 if __name__ == '__main__':
+    config = get_config()
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', required=True,  help='start day')
     parser.add_argument('--stop', required=True, help='start day')
-    parser.add_argument('--db', default='a2v', help='hive db')
+    parser.add_argument('--db',
+                        default=config['requests']['hive_db'],
+                        help='hive db')
     parser.add_argument('--release', required=True, help='hive table')
     parser.add_argument('--priority', default=False,
                         action="store_true", help='queue')
@@ -234,6 +239,6 @@ if __name__ == '__main__':
                  stop,
                  table,
                  trace_db=db,
-                 prod_db='prod',
+                 prod_db=config['requests']['prod'],
                  priority=args.priority,
                  min_count=args.min_count)

@@ -8,5 +8,5 @@ for more details.
 1. Clone this repository into stat1005.
    `git clone --recurse-submodules git@github.com:wikimedia/research-navigation-vectors.git`
 2. Compile submodules.
-   `cd submodules/convertvec && make && cd ../word2vec/ && make`
+   `cd research-navigation-vectors/submodules/convertvec && make && cd ../word2vec/ && make`
 3. 
