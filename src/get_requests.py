@@ -1,9 +1,14 @@
 import argparse
+import sys
+
+from config import get_config
+config = get_config()
+sys.path.append(config['common']['util_path'])
 
 from db_utils import exec_hive_stat2
 from db_utils import get_hive_timespan
 
-from config import get_config
+
 
 
 """
@@ -217,7 +222,6 @@ def get_requests(start, stop, table,  trace_db,
 
 
 if __name__ == '__main__':
-    config = get_config()
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', required=True,  help='start day')
     parser.add_argument('--stop', required=True, help='start day')
@@ -239,6 +243,6 @@ if __name__ == '__main__':
                  stop,
                  table,
                  trace_db=db,
-                 prod_db=config['requests']['prod'],
+                 prod_db=config['requests']['prod_db'],
                  priority=args.priority,
                  min_count=args.min_count)

@@ -28,7 +28,7 @@ if __name__ == '__main__':
     parser.add_argument('--dims', required=True)
 
     args = vars(parser.parse_args())
-    args['output_dir'] = config['common']['hdfs_output_dir']
+    args['output_dir'] = config['common']['hdfs_output_path']
 
     for dim in args['dims'].split(','):
         args['dim'] = dim

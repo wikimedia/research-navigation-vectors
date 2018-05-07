@@ -131,30 +131,30 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
 
     args['table'] = args['release'].replace('-', '_') + '_requests'
-    args['base_hdfs_output_dir'] = config['common']['hdfs_output_dir']
-    args['base_local_output_dir'] = config['common']['local_output_dir']
+    args['base_hdfs_output_path'] = config['common']['hdfs_output_path']
+    args['base_local_output_path'] = config['common']['local_output_path']
 
     # create base dirs
     print('Creating output dirs.')
     print(os.system(
-        'hadoop fs -mkdir %(base_hdfs_output_dir)s/%(release)s' % args))
-    print(os.system('mkdir %(base_local_output_dir)s/%(release)s' % args))
+        'hadoop fs -mkdir %(base_hdfs_output_path)s/%(release)s' % args))
+    print(os.system('mkdir %(base_local_output_path)s/%(release)s' % args))
 
     # define io paths
     args['input_dir'] = '/user/hive/warehouse/'\
                         '%(request_db)s.db/%(table)s' % args
-    args['hdfs_output_dir'] = '%(base_hdfs_output_dir)s/%(release)s/'\
+    args['hdfs_output_path'] = '%(base_hdfs_output_path)s/%(release)s/'\
                               '%(release)s_sessions_%(lang)s' % args
-    args['local_output_file'] = '%(base_local_output_dir)s/%(release)s/'\
+    args['local_output_file'] = '%(base_local_output_path)s/%(release)s/'\
                                 '%(release)s_sessions_%(lang)s' % args
-    args['local_output_dir'] = '%(base_local_output_dir)s/%(release)s/'\
+    args['local_output_path'] = '%(base_local_output_path)s/%(release)s/'\
                                '%(release)s_sessions_%(lang)s_dir' % args
 
     # clean up old data
     print('Cleaning up old data.')
-    print(os.system('hadoop fs -rm -r %(hdfs_output_dir)s' % args))
+    print(os.system('hadoop fs -rm -r %(hdfs_output_path)s' % args))
     print(os.system('rm -rf %(local_output_file)s' % args))
-    print(os.system('rm -rf %(local_output_dir)s' % args))
+    print(os.system('rm -rf %(local_output_path)s' % args))
 
     conf = SparkConf()
     conf.set("spark.app.name", 'a2v preprocess')
@@ -184,12 +184,12 @@ if __name__ == '__main__':
         .map(scrub_dates) \
         .map(to_str) \
         .saveAsTextFile(
-            args['hdfs_output_dir'],
+            args['hdfs_output_path'],
             compressionCodecClass="org.apache.hadoop.io.compress.GzipCodec")
 
     # transfer data to local
-    os.system('hadoop fs -copyToLocal %(hdfs_output_dir)s'
-              ' %(local_output_dir)s' % args)
-    os.system('cat %(local_output_dir)s/* | gunzip >'
+    os.system('hadoop fs -copyToLocal %(hdfs_output_path)s'
+              ' %(local_output_path)s' % args)
+    os.system('cat %(local_output_path)s/* | gunzip >'
               ' %(local_output_file)s' % args)
-    os.system('rm -rf %(local_output_dir)s' % args)
+    os.system('rm -rf %(local_output_path)s' % args)
