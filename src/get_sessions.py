@@ -138,7 +138,7 @@ if __name__ == '__main__':
     print('Creating output dirs.')
     print(os.system(
         'hadoop fs -mkdir %(base_hdfs_output_path)s/%(release)s' % args))
-    print(os.system('mkdir %(base_local_output_path)s/%(release)s' % args))
+    print(os.system('mkdir -p %(base_local_output_path)s/%(release)s' % args))
 
     # define io paths
     args['input_dir'] = '/user/hive/warehouse/'\

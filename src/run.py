@@ -92,7 +92,7 @@ if __name__ == '__main__':
     if args['get_vectors']:
         cmds = []
         if 'langs' in args and 'dims' in args:
-            os.system("mkdir %(local_output_path)s/%(release)s" % args)
+            os.system("mkdir -p %(local_output_path)s/%(release)s" % args)
             cmd = """
             python %(script_path)s/get_vectors.py \
                 --release %(release)s \
