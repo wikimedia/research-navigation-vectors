@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-from .config import get_config
+from config import get_config
 
 
 """

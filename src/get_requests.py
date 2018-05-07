@@ -3,7 +3,7 @@ import argparse
 from db_utils import exec_hive_stat2
 from db_utils import get_hive_timespan
 
-from .config import get_config
+from config import get_config
 
 
 """

@@ -4,7 +4,7 @@ import os
 
 from pyspark import SparkConf, SparkContext
 
-from .config import get_config
+from config import get_config
 
 """
 Given a hive table of requests grouped by IP, UA, XFF and day:
